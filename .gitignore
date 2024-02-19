@@ -1,1 +1,24 @@
-.env 
+#upload
+/upload
+
+#databse
+/database.json
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+
+/_logs
+/_cacache
+
+_update-notifier-last-checked
+
+#.env 환경변수
+.env
