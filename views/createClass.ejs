@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="/main.css" rel="stylesheet">
+</head>
+<body class="grey-bg">
+    <%- include('nav.ejs') %>
+
+    <form class="form-box" action="/create-class" method="post">
+        <h4>강의 생성</h4>
+        <input name="title" placeholder="강의 제목">
+        <input name="content" placeholder="강의 소개">
+        <button type="submit">전송</button>
+    </form> 
+
+  </body>
+</html>

@@ -2,11 +2,13 @@ const express = require('express')
 const app = express()
 const {MongoClient, ObjectId} = require('mongodb')
 require('dotenv').config()
-// const methodOverride = require('method-override'); 
-// app.use(methodOverride('_method'));
-// app.set('view engine', 'ejs')
+const methodOverride = require('method-override'); 
+app.use(methodOverride('_method'));
+app.set('view engine', 'ejs')
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
+
+app.use(express.static(__dirname + '/public'));
 
 //#region 회원기능
 const session = require('express-session')
@@ -51,10 +53,10 @@ passport.use(new LocalStrategy(async (입력한아이디, 입력한비번, cb) =
     })
   })
 
-  passport.deserializeUser(async (user, done) => { 
+  passport.deserializeUser(async (user, done) => {
     let result = await db.collection('user').findOne({_id : new ObjectId(user.id)})
     delete result.password 
-    process.nextTick(() => { 
+    process.nextTick(() => {
       return done(null, result)
     })
   })
@@ -80,7 +82,6 @@ passport.use(new LocalStrategy(async (입력한아이디, 입력한비번, cb) =
   })
 
   app.post('/register', async (req, res) => {
-    console.log(req.body)
     let count = await db.collection('user').find({username : req.body.username}).count();
     if(count > 0){
       return res.send("중복 아이디");
@@ -89,7 +90,7 @@ passport.use(new LocalStrategy(async (입력한아이디, 입력한비번, cb) =
 
     let hash = await bcrypt.hash(req.body.password, 10)
 
-    await db.collection('user').insertOne({username : req.body.username, password : hash, occupation : req.body.occupation}) //악성유저는 맘대로 <input>여러개 만들 수 있어서 req 꺼내서 DB에 넣기
+    await db.collection('user').insertOne({username : req.body.username, password : hash, occupation : req.body.occupation})
     res.redirect('/')
   })
 
@@ -102,10 +103,104 @@ passport.use(new LocalStrategy(async (입력한아이디, 입력한비번, cb) =
   }
 //#endregion
 
-app.use(express.static(__dirname + '/public'));
-
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html')
+  res.sendFile(__dirname + '/index.html')
+})
+
+app.get('/list', async (req, res) => {
+  let result = await db.collection('post').find().toArray();
+  res.render('list.ejs', {posts : result})
+})
+
+app.get('/detail/:id', async (req, res) => {
+try{
+  let result = await db.collection('post').findOne({ _id : new ObjectId(req.params.id)}); 
+  if(result == null){
+    res.status(404).send('이상한 url 입력함')
+  }
+  res.render('detail.ejs', {result : result}); 
+} catch(e){
+  console.log(e);
+  res.status(404).send('이상한 url 입력함')
+}
+}) 
+
+app.get('/enroll/:id', async (req, res) => {
+  if(req.user.occupation == 'student'){
+
+    let result = await db.collection('post').findOne({$and : [
+      {'students._id' : new ObjectId(req.user._id)},
+      {_id : new ObjectId(req.params.id)}
+    ]})
+
+    if(result == null){
+      await db.collection('post').updateOne({_id : new ObjectId(req.params.id)}, 
+      {$push : {students : req.user}})
+      res.redirect('/list')
+    }
+    else{
+      res.send('이미 신청하셨습니다')
+    }
+
+  } else{
+    res.send('학생만 신청할 수 있습니다')
+  }
+
+})
+
+app.get('/myclasses', checkLogin, async (req, res) => {
+  if(req.user.occupation == 'student'){
+    let result = await db.collection('post').find(
+      {'students._id' : new ObjectId(req.user._id)}
+    ).toArray();
+    res.render('myclasses.ejs', {posts : result})
+  }
+  else{
+    let result = await db.collection('post').find(
+      {'user' : new ObjectId(req.user._id)}
+    ).toArray()
+    res.render('myclasses.ejs', {posts : result})
+  }
+})
+
+app.get('/create-class', checkLogin, async (req, res) => {
+  if(req.user.occupation == 'student'){
+    res.send('교수만 강의를 생성할 수 있습니다')
+  }
+  else res.render('createClass.ejs')
+})
+
+app.post('/create-class', async (req, res) => {
+  if(req.body.title == ''){
+    res.send('강의 제목을 입력해주세요')
+  } else{
+    await db.collection('post').insertOne( 
+          {
+            title : req.body.title, 
+            content : req.body.content, 
+            user : req.user._id,
+            username : req.user.username 
+          })
+    res.redirect('/list')
+  }
+})
+
+app.get('/post/:id', checkLogin, async (req, res) => {
+  if(req.user.occupation == 'student'){
+    res.send('교수만 게시물을 생성할 수 있습니다')
+  } else{
+    let result = await db.collection('post').findOne({_id : new ObjectId(req.params.id)})
+    res.render('createPost.ejs', {result : result})
+  }
+
+
+})
+
+app.post('/create-post', async (req, res) => {
+  await db.collection('post').updateOne({_id : new ObjectId(req.body.id)},
+    {$push : {posts : req.body.htmlContent}}
+  )
+
 })
 
 const dbURL = process.env.DB_URL

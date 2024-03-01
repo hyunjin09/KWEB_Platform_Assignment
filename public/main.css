@@ -13,7 +13,6 @@ body {
   color:#fff
 }
 
-
 .nav {
   display: flex;
   padding: 15px;
@@ -50,10 +49,21 @@ body {
 input,div {
   box-sizing: border-box;
 }
+.login{
+  width: 1000px;
+  height: 300px;
+  
+  position: absolute;
+  top:0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  
+  margin: auto;
+}
 .form-box {
   background : white;
   padding : 25px;
-  margin: 20px;
   border-radius: 8px;
 }
 .form-box input {
