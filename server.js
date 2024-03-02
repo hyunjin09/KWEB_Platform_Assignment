@@ -104,21 +104,25 @@ passport.use(new LocalStrategy(async (입력한아이디, 입력한비번, cb) =
 //#endregion
 
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html')
+  if(req.user){
+    res.redirect('/list')
+  }
+  else res.sendFile(__dirname + '/index.html')
 })
 
-app.get('/list', async (req, res) => {
+app.get('/list', checkLogin, async (req, res) => {
   let result = await db.collection('post').find().toArray();
   res.render('list.ejs', {posts : result})
 })
 
-app.get('/detail/:id', async (req, res) => {
+app.get('/detail/:id', checkLogin, async (req, res) => {
 try{
   let result = await db.collection('post').findOne({ _id : new ObjectId(req.params.id)}); 
+  let richTexts = result.posts
   if(result == null){
     res.status(404).send('이상한 url 입력함')
   }
-  res.render('detail.ejs', {result : result}); 
+  res.render('detail.ejs', {result : result, richTexts : richTexts}); 
 } catch(e){
   console.log(e);
   res.status(404).send('이상한 url 입력함')
@@ -149,18 +153,47 @@ app.get('/enroll/:id', async (req, res) => {
 })
 
 app.get('/myclasses', checkLogin, async (req, res) => {
+  let result = null
   if(req.user.occupation == 'student'){
-    let result = await db.collection('post').find(
+    result = await db.collection('post').find(
       {'students._id' : new ObjectId(req.user._id)}
-    ).toArray();
-    res.render('myclasses.ejs', {posts : result})
+    ).toArray()
   }
   else{
-    let result = await db.collection('post').find(
+    result = await db.collection('post').find(
       {'user' : new ObjectId(req.user._id)}
     ).toArray()
-    res.render('myclasses.ejs', {posts : result})
   }
+  res.render('myclasses.ejs', {posts : result})
+})
+
+app.get('/myclasses-posts', checkLogin, async (req, res) =>{
+  let result = null
+  if(req.user.occupation == 'student'){
+    result = await db.collection('post').find(
+      {'students._id' : new ObjectId(req.user._id)}
+    ).toArray()
+  }
+  else{
+    result = await db.collection('post').find(
+      {'user' : new ObjectId(req.user._id)}
+    ).toArray()
+  }
+  let posts = []
+  let times = []
+  for(i=0; i<result.length; i++){
+    if(result[i].posts) posts = posts.concat(result[i].posts)
+    if(result[i].time) times = times.concat(result[i].time)
+  }
+
+  let decor = (v, i) => [v, i];          
+  let undecor = a => a[1];               
+  let argsort = arr => arr.map(decor).sort().map(undecor);
+  order = argsort(times)
+  postSorted = (order.map(i => posts[i])).reverse()
+
+  res.render('myclassesPosts.ejs', {richTexts : postSorted})
+
 })
 
 app.get('/create-class', checkLogin, async (req, res) => {
@@ -198,7 +231,7 @@ app.get('/post/:id', checkLogin, async (req, res) => {
 
 app.post('/create-post', async (req, res) => {
   await db.collection('post').updateOne({_id : new ObjectId(req.body.id)},
-    {$push : {posts : req.body.htmlContent}}
+    {$push : {posts : req.body.htmlContent, time : Date.now()}}
   )
 
 })

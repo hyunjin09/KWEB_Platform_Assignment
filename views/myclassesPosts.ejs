@@ -6,16 +6,11 @@
     <title>Document</title>
     <link href="/main.css" rel="stylesheet">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-</head>
-<body class="grey-bg"> 
-    <%- include('nav.ejs') %>
 
+</head>
+<body class="grey-bg">
+    
     <div class="detail-bg">
-        <h4><%=result.username%> <%= result.title %></h4>
-        <p><%= result.content %></p>
-        <a href="/enroll/<%=result._id%>">신청</a>
-        <br><a href="/post/<%=result._id%>">게시물 작성</a>
-        <br><p></p>
         <% if (richTexts && richTexts.length > 0) { %>
             <% richTexts.forEach(function(richText) { %>
                 <div class="rich-text-container">
@@ -30,8 +25,9 @@
             <p>게시물이 없음</p>
         <% } %>
     </div>
-
+    
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-  
+
+
   </body>
 </html>

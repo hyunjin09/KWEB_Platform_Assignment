@@ -12,7 +12,9 @@ body {
   text-align: center;
   color:#fff
 }
-
+.rich-text-container {
+  margin-bottom: 20px;
+}
 .nav {
   display: flex;
   padding: 15px;
