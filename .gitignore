@@ -22,3 +22,5 @@ _update-notifier-last-checked
 
 #.env 환경변수
 .env
+
+.DS_Store

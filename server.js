@@ -242,7 +242,7 @@ let connectDB = new MongoClient(dbURL).connect()
 connectDB.then((client)=>{
     console.log("DB 연결")
     db = client.db('forum')
-    app.listen(process.env.port, () => {
+    app.listen(process.env.PORT, () => {
         console.log('서버 실행중')
     })
 }).catch((err)=>{

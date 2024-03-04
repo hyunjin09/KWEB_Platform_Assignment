@@ -1,7 +1,6 @@
 {
   "name": "kweb_platform_assignment",
   "version": "1.0.0",
-  "description": "",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -22,5 +21,6 @@
     "mongodb": "^5.9.2",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0"
-  }
+  },
+  "description": ""
 }
