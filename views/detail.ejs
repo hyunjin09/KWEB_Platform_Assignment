@@ -15,6 +15,7 @@
         <p><%= result.content %></p>
         <a href="/enroll/<%=result._id%>">신청</a>
         <br><a href="/post/<%=result._id%>">게시물 작성</a>
+        <br><a href="/check-students/<%=result._id%>">수강 학생 관리</a>
         <br><p></p>
         <% if (richTexts && richTexts.length > 0) { %>
             <% richTexts.forEach(function(richText) { %>

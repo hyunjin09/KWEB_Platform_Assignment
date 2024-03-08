@@ -233,7 +233,31 @@ app.post('/create-post', async (req, res) => {
   await db.collection('post').updateOne({_id : new ObjectId(req.body.id)},
     {$push : {posts : req.body.htmlContent, time : Date.now()}}
   )
+})
 
+app.get('/check-students/:id', checkLogin, async (req, res) => {
+  if(req.user.occupation == 'student'){
+    res.send('교수가 아닙니다')
+  }
+  else{
+    result = await db.collection('post').findOne({_id : new ObjectId(req.params.id)})
+    if(result.students == null || result.students.length == 0) res.send('수강중인 학생이 없습니다')
+    else res.render('manageStudents.ejs', result)
+  }
+
+})
+
+app.get('/cancel/:classid/:studentid', checkLogin, async (req, res) => {
+  if(req.user.occupation == 'student'){
+    res.send('교수가 아닙니다')
+  }
+  else{
+    await db.collection('post').findOneAndUpdate(
+      {_id : new ObjectId(req.params.classid)},
+      {$pull : {students : {_id : new ObjectId(req.params.studentid)}}}
+    )
+    res.redirect(`/check-students/${req.params.classid}`)
+  }
 })
 
 const dbURL = process.env.DB_URL
