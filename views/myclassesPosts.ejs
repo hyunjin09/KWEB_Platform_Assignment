@@ -9,7 +9,10 @@
 
 </head>
 <body class="grey-bg">
-    
+
+    <%- include('nav.ejs') %> 
+    <h2 class="title">모든 게시물</h2>
+
     <div class="detail-bg">
         <% if (richTexts && richTexts.length > 0) { %>
             <% richTexts.forEach(function(richText) { %>

@@ -77,6 +77,13 @@ passport.use(new LocalStrategy(async (입력한아이디, 입력한비번, cb) =
   
   })
 
+  app.get('/logout', (req, res, next) => {
+    req.logout((err) => {
+      if(err) {return next(err)}
+      res.redirect('/')
+    })
+  })
+
   app.get('/register', (req, res) => {
     res.render('register.ejs')
   })
@@ -112,7 +119,7 @@ app.get('/', (req, res) => {
 
 app.get('/list', checkLogin, async (req, res) => {
   let result = await db.collection('post').find().toArray();
-  res.render('list.ejs', {posts : result})
+  res.render('list.ejs', {posts : result, user : req.user.occupation})
 })
 
 app.get('/detail/:id', checkLogin, async (req, res) => {
@@ -122,7 +129,7 @@ try{
   if(result == null){
     res.status(404).send('이상한 url 입력함')
   }
-  res.render('detail.ejs', {result : result, richTexts : richTexts}); 
+  res.render('detail.ejs', {result : result, richTexts : richTexts, user : req.user.occupation}); 
 } catch(e){
   console.log(e);
   res.status(404).send('이상한 url 입력함')
@@ -164,7 +171,7 @@ app.get('/myclasses', checkLogin, async (req, res) => {
       {'user' : new ObjectId(req.user._id)}
     ).toArray()
   }
-  res.render('myclasses.ejs', {posts : result})
+  res.render('myclasses.ejs', {posts : result, user : req.user.occupation})
 })
 
 app.get('/myclasses-posts', checkLogin, async (req, res) =>{
@@ -192,7 +199,7 @@ app.get('/myclasses-posts', checkLogin, async (req, res) =>{
   order = argsort(times)
   postSorted = (order.map(i => posts[i])).reverse()
 
-  res.render('myclassesPosts.ejs', {richTexts : postSorted})
+  res.render('myclassesPosts.ejs', {richTexts : postSorted, user : req.user.occupation})
 
 })
 
@@ -200,7 +207,7 @@ app.get('/create-class', checkLogin, async (req, res) => {
   if(req.user.occupation == 'student'){
     res.send('교수만 강의를 생성할 수 있습니다')
   }
-  else res.render('createClass.ejs')
+  else res.render('createClass.ejs', {user : req.user.occupation})
 })
 
 app.post('/create-class', async (req, res) => {
@@ -223,7 +230,8 @@ app.get('/post/:id', checkLogin, async (req, res) => {
     res.send('교수만 게시물을 생성할 수 있습니다')
   } else{
     let result = await db.collection('post').findOne({_id : new ObjectId(req.params.id)})
-    res.render('createPost.ejs', {result : result})
+    if(req.user._id.toString() == result.user.toString()) res.render('createPost.ejs', {result : result})
+    else res.send('내가 만든 강의가 아닙니다')
   }
 
 
