@@ -11,7 +11,7 @@
     <%- include('nav.ejs') %>
 
     <div class="detail-bg">
-        <h4><%=result.username%> <%= result.title %></h4>
+        <h4><%=result.name%> <%= result.title %></h4>
         <p><%= result.content %></p>
         <a href="/enroll/<%=result._id%>">신청</a>
         <br><a href="/post/<%=result._id%>">게시물 작성</a>

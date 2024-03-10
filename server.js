@@ -62,7 +62,9 @@ passport.use(new LocalStrategy(async (입력한아이디, 입력한비번, cb) =
   })
 
   app.get('/login', async (req, res) => {
-    res.render('login.ejs')
+    if(req.user){
+      res.send('이미 로그인하셨습니다')
+    } else res.render('login.ejs')
   })
 
   app.post('/login', async (req, res, next) => {
@@ -97,7 +99,7 @@ passport.use(new LocalStrategy(async (입력한아이디, 입력한비번, cb) =
 
     let hash = await bcrypt.hash(req.body.password, 10)
 
-    await db.collection('user').insertOne({username : req.body.username, password : hash, occupation : req.body.occupation})
+    await db.collection('user').insertOne({name : req.body.name, username : req.body.username, password : hash, occupation : req.body.occupation})
     res.redirect('/')
   })
 
@@ -219,7 +221,8 @@ app.post('/create-class', async (req, res) => {
             title : req.body.title, 
             content : req.body.content, 
             user : req.user._id,
-            username : req.user.username 
+            username : req.user.username,
+            name : req.user.name
           })
     res.redirect('/list')
   }
@@ -249,8 +252,11 @@ app.get('/check-students/:id', checkLogin, async (req, res) => {
   }
   else{
     result = await db.collection('post').findOne({_id : new ObjectId(req.params.id)})
-    if(result.students == null || result.students.length == 0) res.send('수강중인 학생이 없습니다')
-    else res.render('manageStudents.ejs', result)
+    if(req.user._id.toString() == result.user.toString()) {
+      if(result.students == null || result.students.length == 0) res.send('수강중인 학생이 없습니다')
+      else res.render('manageStudents.ejs', result)
+    }
+    else res.send('내가 만든 강의가 아닙니다')
   }
 
 })
@@ -264,7 +270,7 @@ app.get('/cancel/:classid/:studentid', checkLogin, async (req, res) => {
       {_id : new ObjectId(req.params.classid)},
       {$pull : {students : {_id : new ObjectId(req.params.studentid)}}}
     )
-    res.redirect(`/check-students/${req.params.classid}`)
+    res.redirect(`/detail/${req.params.classid}`)
   }
 })
 

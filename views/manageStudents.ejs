@@ -9,13 +9,12 @@
 <body class="grey-bg">
     
     <%- include('nav.ejs') %> 
+    <h2 class="title"><%= result.title %></h2>
+
     <div class="white-bg">
-        <h3>
-            <%= result.title %>
-        </h3>
         <% for(let i=0; i<result.students.length; i++){ %> 
             <div class="list-box">
-                <p><%=result.students[i].username%></p> 
+                <p><%=result.students[i].name%></p> 
                 <a href="/cancel/<%=result._id%>/<%=result.students[i]._id%>">수강취소</a>
             </div>
             <% } %>
