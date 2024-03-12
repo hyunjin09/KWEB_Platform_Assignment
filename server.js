@@ -252,7 +252,6 @@ app.get('/check-students/:id', checkLogin, async (req, res) => {
   }
   else{
     result = await db.collection('post').findOne({_id : new ObjectId(req.params.id)})
-    console.log(result)
     if(req.user._id.toString() == result.user.toString()) {
       if(result.students == null || result.students.length == 0) res.send('수강중인 학생이 없습니다')
       else res.render('manageStudents.ejs', result)
