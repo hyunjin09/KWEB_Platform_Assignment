@@ -99,7 +99,7 @@ passport.use(new LocalStrategy(async (입력한아이디, 입력한비번, cb) =
 
     let hash = await bcrypt.hash(req.body.password, 10)
 
-    await db.collection('user').insertOne({name : req.body.name, username : req.body.username, password : hash, occupation : req.body.occupation})
+    await db.collection('user').insertOne({name : req.body.name, id_num : req.body.id_num, username : req.body.username, password : hash, occupation : req.body.occupation})
     res.redirect('/')
   })
 
@@ -252,6 +252,7 @@ app.get('/check-students/:id', checkLogin, async (req, res) => {
   }
   else{
     result = await db.collection('post').findOne({_id : new ObjectId(req.params.id)})
+    console.log(result)
     if(req.user._id.toString() == result.user.toString()) {
       if(result.students == null || result.students.length == 0) res.send('수강중인 학생이 없습니다')
       else res.render('manageStudents.ejs', result)

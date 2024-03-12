@@ -14,7 +14,8 @@
     <div class="white-bg">
         <% for(let i=0; i<result.students.length; i++){ %> 
             <div class="list-box">
-                <p><%=result.students[i].name%></p> 
+                <p><%=result.students[i].name%></p>
+                <p><%=result.students[i].id_num%></p>
                 <a href="/cancel/<%=result._id%>/<%=result.students[i]._id%>">수강취소</a>
             </div>
             <% } %>
